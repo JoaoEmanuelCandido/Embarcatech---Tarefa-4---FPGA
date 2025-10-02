@@ -1,0 +1,259 @@
+{
+    "csr_bases": {
+        "dotprod": 4026531840,
+        "ctrl": 4026533888,
+        "identifier_mem": 4026535936,
+        "leds": 4026537984,
+        "sdram": 4026540032,
+        "spiflash": 4026542080,
+        "timer0": 4026544128,
+        "uart": 4026546176
+    },
+    "csr_registers": {
+        "dotprod_start": {
+            "addr": 4026531840,
+            "size": 1,
+            "type": "rw"
+        },
+        "dotprod_done": {
+            "addr": 4026531844,
+            "size": 1,
+            "type": "ro"
+        },
+        "dotprod_result": {
+            "addr": 4026531848,
+            "size": 2,
+            "type": "ro"
+        },
+        "ctrl_reset": {
+            "addr": 4026533888,
+            "size": 1,
+            "type": "rw"
+        },
+        "ctrl_scratch": {
+            "addr": 4026533892,
+            "size": 1,
+            "type": "rw"
+        },
+        "ctrl_bus_errors": {
+            "addr": 4026533896,
+            "size": 1,
+            "type": "ro"
+        },
+        "leds_out": {
+            "addr": 4026537984,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_control": {
+            "addr": 4026540032,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_pi0_command": {
+            "addr": 4026540036,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_pi0_command_issue": {
+            "addr": 4026540040,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_pi0_address": {
+            "addr": 4026540044,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_pi0_baddress": {
+            "addr": 4026540048,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_pi0_wrdata": {
+            "addr": 4026540052,
+            "size": 1,
+            "type": "rw"
+        },
+        "sdram_dfii_pi0_rddata": {
+            "addr": 4026540056,
+            "size": 1,
+            "type": "ro"
+        },
+        "spiflash_phy_clk_divisor": {
+            "addr": 4026542080,
+            "size": 1,
+            "type": "rw"
+        },
+        "spiflash_mmap_dummy_bits": {
+            "addr": 4026542084,
+            "size": 1,
+            "type": "rw"
+        },
+        "spiflash_master_cs": {
+            "addr": 4026542088,
+            "size": 1,
+            "type": "rw"
+        },
+        "spiflash_master_phyconfig": {
+            "addr": 4026542092,
+            "size": 1,
+            "type": "rw"
+        },
+        "spiflash_master_rxtx": {
+            "addr": 4026542096,
+            "size": 1,
+            "type": "rw"
+        },
+        "spiflash_master_status": {
+            "addr": 4026542100,
+            "size": 1,
+            "type": "ro"
+        },
+        "timer0_load": {
+            "addr": 4026544128,
+            "size": 1,
+            "type": "rw"
+        },
+        "timer0_reload": {
+            "addr": 4026544132,
+            "size": 1,
+            "type": "rw"
+        },
+        "timer0_en": {
+            "addr": 4026544136,
+            "size": 1,
+            "type": "rw"
+        },
+        "timer0_update_value": {
+            "addr": 4026544140,
+            "size": 1,
+            "type": "rw"
+        },
+        "timer0_value": {
+            "addr": 4026544144,
+            "size": 1,
+            "type": "ro"
+        },
+        "timer0_ev_status": {
+            "addr": 4026544148,
+            "size": 1,
+            "type": "ro"
+        },
+        "timer0_ev_pending": {
+            "addr": 4026544152,
+            "size": 1,
+            "type": "rw"
+        },
+        "timer0_ev_enable": {
+            "addr": 4026544156,
+            "size": 1,
+            "type": "rw"
+        },
+        "uart_rxtx": {
+            "addr": 4026546176,
+            "size": 1,
+            "type": "rw"
+        },
+        "uart_txfull": {
+            "addr": 4026546180,
+            "size": 1,
+            "type": "ro"
+        },
+        "uart_rxempty": {
+            "addr": 4026546184,
+            "size": 1,
+            "type": "ro"
+        },
+        "uart_ev_status": {
+            "addr": 4026546188,
+            "size": 1,
+            "type": "ro"
+        },
+        "uart_ev_pending": {
+            "addr": 4026546192,
+            "size": 1,
+            "type": "rw"
+        },
+        "uart_ev_enable": {
+            "addr": 4026546196,
+            "size": 1,
+            "type": "rw"
+        },
+        "uart_txempty": {
+            "addr": 4026546200,
+            "size": 1,
+            "type": "ro"
+        },
+        "uart_rxfull": {
+            "addr": 4026546204,
+            "size": 1,
+            "type": "ro"
+        }
+    },
+    "constants": {
+        "config_platform_name": "colorlight_i5",
+        "config_clock_frequency": 60000000,
+        "config_cpu_has_interrupt": null,
+        "config_cpu_reset_addr": 0,
+        "config_cpu_has_dcache": null,
+        "config_cpu_has_icache": null,
+        "config_cpu_type_vexriscv": null,
+        "config_cpu_variant_standard": null,
+        "config_cpu_family": "riscv",
+        "config_cpu_name": "vexriscv",
+        "config_cpu_human_name": "vexriscv",
+        "config_cpu_nop": "nop",
+        "config_identifier": "litex soc on colorlight i5 2025-10-02 10:18:34",
+        "spiflash_phy_frequency": 15000000,
+        "spiflash_module_name": "gd25q16",
+        "spiflash_module_total_size": 2097152,
+        "spiflash_module_page_size": 256,
+        "config_l2_size": 8192,
+        "localip1": 192,
+        "localip2": 168,
+        "localip3": 1,
+        "localip4": 50,
+        "remoteip1": 192,
+        "remoteip2": 168,
+        "remoteip3": 1,
+        "remoteip4": 100,
+        "config_csr_data_width": 32,
+        "config_csr_alignment": 32,
+        "config_csr_ordering_big": null,
+        "config_bus_standard": "wishbone",
+        "config_bus_data_width": 32,
+        "config_bus_address_width": 32,
+        "config_bus_bursting": 0,
+        "config_cpu_interrupts": 2,
+        "timer0_interrupt": 1,
+        "uart_interrupt": 0
+    },
+    "memories": {
+        "rom": {
+            "base": 0,
+            "size": 131072,
+            "type": "cached"
+        },
+        "sram": {
+            "base": 268435456,
+            "size": 8192,
+            "type": "cached"
+        },
+        "spiflash": {
+            "base": 2097152,
+            "size": 2097152,
+            "type": "cached"
+        },
+        "main_ram": {
+            "base": 1073741824,
+            "size": 8388608,
+            "type": "cached"
+        },
+        "csr": {
+            "base": 4026531840,
+            "size": 65536,
+            "type": "io"
+        }
+    }
+}
