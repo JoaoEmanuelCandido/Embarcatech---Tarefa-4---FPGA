@@ -7,11 +7,26 @@ class DotProd(Module, AutoCSR):
         platform.add_source("../rtl/dotprod.sv")
 
         # CSRs: entradas e saídas
-        self._start  = CSRStorage(1, name="start")
-        self._a      = [CSRStorage(32, name=f"a{i}") for i in range(8)]
-        self._b      = [CSRStorage(32, name=f"b{i}") for i in range(8)]
-        self._done   = CSRStatus(1,  name="done")
-        self._result = CSRStatus(64, name="result")
+        self.start  = CSRStorage(1, name="start")
+        self.a0 = CSRStorage(32, name="a0")
+        self.a1 = CSRStorage(32, name="a1")
+        self.a2 = CSRStorage(32, name="a2")
+        self.a3 = CSRStorage(32, name="a3")
+        self.a4 = CSRStorage(32, name="a4")
+        self.a5 = CSRStorage(32, name="a5")
+        self.a6 = CSRStorage(32, name="a6")
+        self.a7 = CSRStorage(32, name="a7")
+
+        self.b0 = CSRStorage(32, name="b0")
+        self.b1 = CSRStorage(32, name="b1")
+        self.b2 = CSRStorage(32, name="b2")
+        self.b3 = CSRStorage(32, name="b3")
+        self.b4 = CSRStorage(32, name="b4")
+        self.b5 = CSRStorage(32, name="b5")
+        self.b6 = CSRStorage(32, name="b6")
+        self.b7 = CSRStorage(32, name="b7")
+        self.done   = CSRStatus(1,  name="done")
+        self.result = CSRStatus(64, name="result")
 
         # sinais internos
         start_sig  = Signal()
@@ -34,9 +49,23 @@ class DotProd(Module, AutoCSR):
 
         # mapeamento CSRs <-> sinais
         self.comb += [
-            start_sig.eq(self._start.storage),
-            *[a_sig[i].eq(self._a[i].storage) for i in range(8)],
-            *[b_sig[i].eq(self._b[i].storage) for i in range(8)],
-            self._done.status.eq(done_sig),
-            self._result.status.eq(result_sig)
+            start_sig.eq(self.start.storage),
+            a_sig[0].eq(self.a0.storage),
+            a_sig[1].eq(self.a1.storage),
+            a_sig[2].eq(self.a2.storage),
+            a_sig[3].eq(self.a3.storage),
+            a_sig[4].eq(self.a4.storage),
+            a_sig[5].eq(self.a5.storage),
+            a_sig[6].eq(self.a6.storage),
+            a_sig[7].eq(self.a7.storage),
+            b_sig[0].eq(self.b0.storage),
+            b_sig[1].eq(self.b1.storage),
+            b_sig[2].eq(self.b2.storage),
+            b_sig[3].eq(self.b3.storage),
+            b_sig[4].eq(self.b4.storage),
+            b_sig[5].eq(self.b5.storage),
+            b_sig[6].eq(self.b6.storage),
+            b_sig[7].eq(self.b7.storage),
+            self.done.status.eq(done_sig),
+            self.result.status.eq(result_sig)
         ]
