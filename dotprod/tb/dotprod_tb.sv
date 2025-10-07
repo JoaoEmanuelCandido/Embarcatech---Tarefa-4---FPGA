@@ -12,7 +12,7 @@ module dotprod_tb;
     // Instância do módulo
     dotprod dut (
         .clk(clk),
-        .rst(rst),            // mudou de rst_n para rst
+        .rst(rst),
         .a0(a[0]), .a1(a[1]), .a2(a[2]), .a3(a[3]),
         .a4(a[4]), .a5(a[5]), .a6(a[6]), .a7(a[7]),
         .b0(b[0]), .b1(b[1]), .b2(b[2]), .b3(b[3]),
@@ -64,11 +64,11 @@ module dotprod_tb;
     // Inicialização
     initial begin
         clk = 0;
-        rst = 1;      // reset ativo alto
+        rst = 1;
         start = 0;
 
         @(posedge clk);
-        rst = 0;      // libera reset
+        rst = 0;
 
         // Inicializa os arrays de teste elemento por elemento
         test_a[0] = 1; test_a[1] = 2; test_a[2] = 3; test_a[3] = 4;

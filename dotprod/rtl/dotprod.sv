@@ -5,7 +5,7 @@ module dotprod #(
     parameter OUT_WIDTH = 64
 )(
     input  logic                  clk,
-    input  logic                  rst,      // reset ativo alto (para LiteX)
+    input  logic                  rst,
     input  logic                  start,
     input  logic [IN_WIDTH-1:0]   a0, a1, a2, a3, a4, a5, a6, a7,
     input  logic [IN_WIDTH-1:0]   b0, b1, b2, b3, b4, b5, b6, b7,
