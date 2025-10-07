@@ -33,16 +33,27 @@ git clone https://github.com/JoaoEmanuelCandido/Embarcatech---Tarefa-4---FPGA.gi
 cd Embarcatech---Tarefa-4---FPGA
 ```
 
-### 2. **Gere o SoC com LiteX**
+### 2. **Acione o ambiente do OSS CAD SUITE e Gere o SoC com LiteX**
 ```sh
-python3 dotprod/litex/colorlight_i5.py --build
+source ~/AppsUserWork/LiteX/oss-cad-suite-linux-x64-20250929/oss-cad-suite/environment
+cd dotprod/litex
+python3 colorlight_i5.py --build
+```
+É importante destacar que para iniciar o ambiente é necessário te-lo instalado. Em caso de erro com o Yosys, rode o seguinte comando e tente novamente:
+```sh
+python3 colorlight_i5.py --clean-all
 ```
 
 ### 3. **Compile o firmware**
 ```sh
-cd dotprod/firmware
+cd ../firmware
 make
 ```
+Se houver algum erro, tente executar o comando:
+```sh
+make clean
+```
+E tente novamente.
 
 ### 4. **Grave o bitstream e o firmware na placa**
 ```sh
@@ -54,7 +65,7 @@ litex_term /dev/ttyUSBx --kernel main.bin
 ```
 
 ### 5. **Execute e teste via terminal serial**
-- Conecte ao terminal serial (ex: `minicom`, `screen`, `litex_term`)
+- Conecte ao terminal serial (ex: `litex_term`, mostrado anteriormente).
 - O firmware irá mostrar os resultados do produto escalar em hardware e software.
 
 ---
