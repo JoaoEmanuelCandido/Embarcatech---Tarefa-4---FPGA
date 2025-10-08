@@ -1,15 +1,15 @@
-`timescale 1ps/1ps
+`timescale 1ns/1ps
 module dotprod_tb;
 
-    logic        clk;
-    logic        rst;
-    logic [31:0] a[0:7];
-    logic [31:0] b[0:7];
-    logic        start;
-    logic        done;
-    logic [63:0] result;
+    reg         clk;
+    reg         rst;
+    reg  [31:0] a[0:7];
+    reg  [31:0] b[0:7];
+    reg         start;
+    wire        done;
+    wire [63:0] result;
 
-    // Instância do módulo
+    // Instância do módulo (nome dotprod conforme seu RTL)
     dotprod dut (
         .clk(clk),
         .rst(rst),
@@ -22,16 +22,18 @@ module dotprod_tb;
         .result(result)
     );
 
-    // Clock
+    // Clock de 100 MHz (período = 10 ns)
+    initial clk = 0;
     always #5 clk = ~clk;
 
-    // Arrays de teste globais
-    logic [31:0] test_a[0:7];
-    logic [31:0] test_b[0:7];
+    // Arrays de teste globais (regs)
+    reg [31:0] test_a[0:7];
+    reg [31:0] test_b[0:7];
 
-    // Task para rodar o teste
-    task automatic run_test;
+    // Task para rodar o teste (não-automatic para compatibilidade)
+    task run_test;
         integer i;
+        integer timeout_cnt;
         begin
             // Copia valores de teste para entradas
             for (i = 0; i < 8; i = i + 1) begin
@@ -39,47 +41,77 @@ module dotprod_tb;
                 b[i] = test_b[i];
             end
 
+            // Pulso de start (1 ciclo de clock)
             start = 1;
             @(posedge clk);
             start = 0;
 
-            wait(done);
+            // Espera por 'done' com timeout para evitar travamento eterno
+            timeout_cnt = 0;
+            while (!done) begin
+                @(posedge clk);
+                timeout_cnt = timeout_cnt + 1;
+                if (timeout_cnt > 200) begin
+                    $display("ERROR: timeout esperando done (aborting simulation).");
+                    $finish;
+                end
+            end
 
+            // Pequena pausa para estabilizar resultado
+            @(posedge clk);
+
+            // Impressão
             $display("==================================================");
             $display("|                Produto Escalar                 |");
             $display("==================================================");
             $write("| A = [");
             for (i = 0; i < 8; i = i + 1) $write(" %0d", a[i]);
-            $display(" ]                        |");
+            $display(" ]");
 
             $write("| B = [");
             for (i = 0; i < 8; i = i + 1) $write(" %0d", b[i]);
-            $display(" ]                        |");
+            $display(" ]");
 
             $display("| Resultado Final = %0d", result);
             $display("==================================================\n");
+
+            // Espera alguns ciclos antes do próximo teste
+            repeat (2) @(posedge clk);
         end
     endtask
 
     // Inicialização
     initial begin
-        clk = 0;
         rst = 1;
         start = 0;
 
-        @(posedge clk);
+        // aguarda alguns ciclos com clock antes de soltar reset
+        repeat (5) @(posedge clk);
         rst = 0;
+        @(posedge clk);
 
-        // Inicializa os arrays de teste elemento por elemento
-        test_a[0] = 1; test_a[1] = 2; test_a[2] = 3; test_a[3] = 4;
+        // TESTE 1
+        test_a[0] = 2; test_a[1] = 7; test_a[2] = 5; test_a[3] = 3;
         test_a[4] = 5; test_a[5] = 6; test_a[6] = 7; test_a[7] = 8;
-
         test_b[0] = 8; test_b[1] = 7; test_b[2] = 6; test_b[3] = 5;
         test_b[4] = 4; test_b[5] = 3; test_b[6] = 2; test_b[7] = 1;
-
-        // Roda o teste
         run_test();
 
+        // TESTE 2
+        test_a[0] = 1; test_a[1] = 2; test_a[2] = 3; test_a[3] = 4;
+        test_a[4] = 5; test_a[5] = 6; test_a[6] = 7; test_a[7] = 8;
+        test_b[0] = 8; test_b[1] = 7; test_b[2] = 6; test_b[3] = 5;
+        test_b[4] = 4; test_b[5] = 3; test_b[6] = 2; test_b[7] = 1;
+        run_test();
+
+        // TESTE 3
+        test_a[0] = 1; test_a[1] = 2; test_a[2] = 3; test_a[3] = 4;
+        test_a[4] = 5; test_a[5] = 6; test_a[6] = 7; test_a[7] = 8;
+        test_b[0] = 0; test_b[1] = 1; test_b[2] = 0; test_b[3] = 1;
+        test_b[4] = 0; test_b[5] = 1; test_b[6] = 0; test_b[7] = 1;
+        run_test();
+
+        $display("All tests done.");
         $finish;
     end
 

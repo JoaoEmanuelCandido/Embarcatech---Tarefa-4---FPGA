@@ -1,33 +1,107 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdint.h>
-#include <stdbool.h>
+#include <string.h>
 
-// Inclui o cabeçalho gerado pelo LiteX
-// ESTE ARQUIVO DEVE CONTER AS FUNÇÕES dotprod_aX_write e dotprod_bX_write
+#include <irq.h>
+#include <uart.h>
+#include <console.h>
 #include <generated/csr.h>
-#include <libbase/console.h>
-#include <libbase/uart.h>
 
 #define N_ELEMENTS 8
 
-// Função para calcular o produto escalar em software
-// Usamos int64_t para garantir que o acumulador não sature,
-// pois a multiplicação de dois int32_t pode resultar em até 64 bits.
-int64_t dotprod_software(int32_t *a, int32_t *b, int n) {
-    int64_t sum = 0;
-    for (int i = 0; i < n; i++) {
-        // Multiplicação de 32-bit signed que é promovida para 64-bit signed
-        sum += (int64_t)a[i] * (int64_t)b[i];
+static int64_t dotprod_software(int32_t *a, int32_t *b, int n);
+static void run_dotprod_hardware(int32_t *a, int32_t *b, int64_t *result_hw);
+static void test_dotprod(void);
+
+static char *readstr(void)
+{
+    char c[2];
+    static char s[64];
+    static int ptr = 0;
+
+    if(readchar_nonblock()) {
+        c[0] = readchar();
+        c[1] = 0;
+        switch(c[0]) {
+            case 0x7f:
+            case 0x08:
+                if(ptr > 0) {
+                    ptr--;
+                    putsnonl("\x08 \x08");
+                }
+                break;
+            case 0x07:
+                break;
+            case '\r':
+            case '\n':
+                s[ptr] = 0x00;
+                putsnonl("\n");
+                ptr = 0;
+                return s;
+            default:
+                if(ptr >= (sizeof(s) - 1))
+                    break;
+                putsnonl(c);
+                s[ptr] = c[0];
+                ptr++;
+                break;
+        }
     }
-    return sum;
+    return NULL;
 }
 
-// Função para interagir com o acelerador de hardware
-static uint64_t run_dotprod_hardware(int32_t *a, int32_t *b) {
-    printf(">> Escrevendo dados nos CSRs...\n");
-    
-    // Escreve vetor A (a0 a a7)
+static char *get_token(char **str)
+{
+    char *c, *d;
+    c = strchr(*str, ' ');
+    if(c == NULL) {
+        d = *str;
+        *str += strlen(*str);
+        return d;
+    }
+    *c = 0;
+    d = *str;
+    *str = c + 1;
+    return d;
+}
+
+static void prompt(void)
+{
+    printf("RUNTIME>");
+}
+
+static void help(void)
+{
+    puts("Available commands:");
+    puts("help         - this command");
+    puts("reboot       - reboot CPU");
+    puts("led          - led test");
+    puts("dotprod      - dot product test");
+}
+
+static void reboot(void)
+{
+    ctrl_reset_write(1);
+}
+
+static void toggle_led(void)
+{
+    int i;
+    printf("invertendo led...\n");
+    i = leds_out_read();
+    leds_out_write(!i);
+}
+
+static int64_t dotprod_software(int32_t *a, int32_t *b, int n)
+{
+    int64_t acc = 0;
+    for (int i = 0; i < n; i++)
+        acc += (int64_t)a[i] * b[i];
+    return acc;
+}
+
+static void run_dotprod_hardware(int32_t *a, int32_t *b, int64_t *result_hw)
+{
     dotprod_a0_write(a[0]);
     dotprod_a1_write(a[1]);
     dotprod_a2_write(a[2]);
@@ -37,7 +111,6 @@ static uint64_t run_dotprod_hardware(int32_t *a, int32_t *b) {
     dotprod_a6_write(a[6]);
     dotprod_a7_write(a[7]);
 
-    // Escreve vetor B (b0 a b7)
     dotprod_b0_write(b[0]);
     dotprod_b1_write(b[1]);
     dotprod_b2_write(b[2]);
@@ -47,59 +120,69 @@ static uint64_t run_dotprod_hardware(int32_t *a, int32_t *b) {
     dotprod_b6_write(b[6]);
     dotprod_b7_write(b[7]);
 
-    printf(">> Enviando sinal de START...\n");
-    // Starta a operação
     dotprod_start_write(1);
-    
-    // Espera pelo sinal DONE (Polling)
-    while(!dotprod_done_read()) {
-        // Aguarda a conclusão
-    }
-    
-    // Desliga o START (se necessário, para reuso)
+    while(!dotprod_done_read());
     dotprod_start_write(0);
 
-    // Lê o resultado (64 bits)
-    return dotprod_result_read();
+    uint64_t result_raw = dotprod_result_read();
+    *result_hw = (int64_t)result_raw;
 }
 
-int main(void) {
-    // Atraso inicial para estabilização
-    for (volatile int i = 0; i < 100000; i++);
-    
-    printf("--- Teste do Acelerador Dot Product ---\n");
-    
-    // Dados de teste (Exemplo: 1*(-1) + 2*2 + ... = -1 + 4 + 9 + 16 + 25 + 36 + 49 + 64 = 194)
-    int32_t a[N_ELEMENTS] = {-1, 2, 3, 4, 5, 6, 7, 8};
-    int32_t b[N_ELEMENTS] = {1, 2, 3, 4, 5, 6, 7, 8};
-    
-    int64_t result_sw;
-    uint64_t result_hw_raw;
-    int64_t result_hw_signed;
+static void test_dotprod(void)
+{
+    int32_t a[N_ELEMENTS] = {1, 2, 3, 4, 5, 6, 7, 8};
+    int32_t b[N_ELEMENTS] = {8, 7, 6, 5, 4, 3, 2, 1};
 
-    // 1. Cálculo em Software (SW)
-    result_sw = dotprod_software(a, b, N_ELEMENTS);
-    printf("\n[SW] Resultado esperado: %lld\n", (long long)result_sw);
+    int64_t result_sw = dotprod_software(a, b, N_ELEMENTS);
+    int64_t result_hw;
 
-    // 2. Cálculo no Hardware (HW)
-    result_hw_raw = run_dotprod_hardware(a, b);
-    
-    // Faz o cast do uint64_t lido para int64_t para impressão correta de signed number
-    result_hw_signed = (int64_t)result_hw_raw;
-    printf("[HW] Resultado lido: %lld\n", (long long)result_hw_signed);
+    run_dotprod_hardware(a, b, &result_hw);
 
-    // 3. Verificação
-    printf("\n--- Verificação ---\n");
-    if (result_sw == result_hw_signed) {
-        printf("SUCESSO: Os resultados em Software e Hardware são iguais.\n");
-    } else {
-        printf("FALHA: Resultados diferentes! SW: %lld, HW: %lld\n", (long long)result_sw, (long long)result_hw_signed);
-    }
-    
-    // Loop infinito para manter a UART ativa
-    while(1) {
-        // Não faz nada, apenas espera
-    }
+    printf("\n--- Teste do Acelerador Dot Product ---\n");
+    printf("[SW] Resultado esperado: %ld\n", (long)result_sw);
+    printf("[HW] Resultado lido:     %ld\n", (long)result_hw);
+
+    if (result_sw == result_hw)
+        printf("SUCESSO: resultados iguais.\n");
+    else
+        printf("FALHA: resultados diferentes!\n");
+}
+
+static void console_service(void)
+{
+    char *str, *token;
+    str = readstr();
+    if(str == NULL) return;
+
+    token = get_token(&str);
+    if(strcmp(token, "help") == 0)
+        help();
+    else if(strcmp(token, "reboot") == 0)
+        reboot();
+    else if(strcmp(token, "led") == 0)
+        toggle_led();
+    else if(strcmp(token, "dotprod") == 0)
+        test_dotprod();
+    else
+        puts("Comando desconhecido. Digite 'help'.");
+
+    prompt();
+}
+
+int main(void)
+{
+#ifdef CONFIG_CPU_HAS_INTERRUPT
+    irq_setmask(0);
+    irq_setie(1);
+#endif
+    uart_init();
+
+    printf("Hellorld!\n");
+    help();
+    prompt();
+
+    while(1)
+        console_service();
 
     return 0;
 }

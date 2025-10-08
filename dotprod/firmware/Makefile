@@ -7,7 +7,6 @@ OBJECTS   = crt0.o main.o
 
 all: main.bin
 
-# pull in dependency info for *existing* .o files
 -include $(OBJECTS:.o=.d)
 
 %.bin: %.elf

@@ -37,7 +37,7 @@ cd Embarcatech---Tarefa-4---FPGA
 ```sh
 source ~/AppsUserWork/LiteX/oss-cad-suite-linux-x64-20250929/oss-cad-suite/environment
 cd dotprod/litex
-python3 colorlight_i5.py --build
+python3 colorlight_i5.py --board i9 --revision 7.2 --build --cpu-type=picorv32  --ecppack-compress
 ```
 É importante destacar que para iniciar o ambiente é necessário te-lo instalado. Em caso de erro com o Yosys, rode o seguinte comando e tente novamente:
 ```sh
@@ -56,39 +56,56 @@ make clean
 E tente novamente.
 
 ### 4. **Grave o bitstream e o firmware na placa**
+Primeiro, execute no terminal o seguinte comando:
 ```sh
-python ../litex/colorlight_i5.py --load
+which openFPGALoader
 ```
-Ou, para carregar só o firmware via terminal LiteX:
+
+Copie o caminho descoberto e execute os próximos passos, colocando o caminho no local indicado. O openFPGALoader é uma ferramenta utilizada para carregar arquivos para o FPGA, e já vem por padrão no OSS CAD Suite.
+
 ```sh
-litex_term /dev/ttyUSBx --kernel main.bin
+cd ../litex
+/caminho/descoberto -b colorlight-i5 build/colorlight_i5/gateware/colorlight_i5.bit
 ```
 
 ### 5. **Execute e teste via terminal serial**
-- Conecte ao terminal serial (ex: `litex_term`, mostrado anteriormente).
-- O firmware irá mostrar os resultados do produto escalar em hardware e software.
+Execute o seguinte comando, e caso não apareça nada, aperte "enter".
+```sh
+litex_term /dev/ttyACM0 --kernel ../firmware/main.bin
+```
+
+Após abrir o terminal, digite "reboot". Automaticamente o FPGA será reiniciado, e o programa será executado e mostrado no terminal.
 
 ---
 
 ## Exemplo de Log de Execução
 
 ```
-Produto escalar via hardware:  12345678
-Produto escalar via software:  12345678
+Produto escalar via hardware:  120
+Produto escalar via software:  120
 Resultado: OK!
 ```
 ---
 
-## Arquivos do Projeto
+## Testando o Módulo
+Para testa o acelerador (módulo systemverilog criado para este projeto), é possível verificar seu funcionamento utilizando o testbench da pasta "tb". Exemplo de código com iverilog (para execução do código específico de demonstração, o usuário deve estar apenas na pasta dotdrop).
+
+```sh
+iverilog -g2012 rtl/dotprod.sv tb/dotprod_tb.sv 
+./a.out
+```
+
+---
+
+## Organização dos Arquivos
 
 - `dotprod/rtl/dotprod.sv` — Bloco SystemVerilog do acelerador
-- `dotprod/rtl/dotprod_tb.sv` — Testbench do acelerador
+- `dotprod/tb/dotprod_tb.sv` — Testbench do acelerador
 - `dotprod/litex/dotprod.py` — Wrapper Python/Migen (CSR)
 - `dotprod/litex/colorlight_i5.py` — Arquivo do SoC modificado
 - `dotprod/firmware/main.c` — Firmware em C
 - `dotprod/firmware/Makefile` — Script de build do firmware
 - `dotprod/firmware/linker.ld` — Script do linker
-- `dotprod/litex/build/colorlight_i5/software/include/generated/csr.h` — Header gerado dos CSRs
 
 ---
 
@@ -96,6 +113,7 @@ Resultado: OK!
 
 - [LiteX Documentation](https://github.com/enjoy-digital/litex)
 - [LiteX Boards - colorlight_i5](https://github.com/litex-hub/litex-boards/blob/master/litex_boards/targets/colorlight_i5.py)
+- [Repositório de Exemplo](https://github.com/dvcirilo/colorlight-i9-examples/blob/main/fibonacci_litex/firmware/main.c)
 
 ---
 
