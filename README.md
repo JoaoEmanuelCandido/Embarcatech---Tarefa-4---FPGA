@@ -29,8 +29,8 @@ Este projeto implementa um acelerador de produto escalar para o SoC LiteX, utili
 
 ### 1. **Clone o repositório**
 ```sh
-git clone https://github.com/JoaoEmanuelCandido/Embarcatech---Tarefa-4---FPGA.git
-cd Embarcatech---Tarefa-4---FPGA
+git clone https://github.com/JoaoEmanuelCandido/Embarcatech-Tarefa-4-FPGA.git
+cd Embarcatech-Tarefa-4-FPGA
 ```
 
 ### 2. **Acione o ambiente do OSS CAD SUITE e Gere o SoC com LiteX**
@@ -73,6 +73,8 @@ Execute o seguinte comando, e caso não apareça nada, aperte "enter".
 ```sh
 litex_term /dev/ttyACM0 --kernel ../firmware/main.bin
 ```
+
+Caso ocorra algum erro com relação a porta, tente mudar para "ttyACM1", ou verifique a porta utilizada no momento em que foi colocado o FPGA no dispositivo.
 
 Após abrir o terminal, digite "reboot". Automaticamente o FPGA será reiniciado, e o programa será executado e mostrado no terminal.
 
